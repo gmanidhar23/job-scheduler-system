@@ -1,0 +1,1 @@
+Run Next.js frontend here (basic structure provided)
