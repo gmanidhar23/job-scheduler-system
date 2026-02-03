@@ -23,12 +23,10 @@ export const getJob = async (req, res) => {
 
 export const runJob = async (req, res) => {
   const id = req.params.id;
-
   await db.query("UPDATE jobs SET status='running' WHERE id=?", [id]);
 
   setTimeout(async () => {
     await db.query("UPDATE jobs SET status='completed' WHERE id=?", [id]);
-
     const [job] = await db.query("SELECT * FROM jobs WHERE id=?", [id]);
 
     await axios.post("https://webhook.site/YOUR-ID", {
