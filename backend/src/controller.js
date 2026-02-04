@@ -1,28 +1,30 @@
+const { db } = require("./db");
+const axios = require("axios");
 
-import { db } from "./db.js";
-import axios from "axios";
-
-export const createJob = async (req, res) => {
+const createJob = async (req, res) => {
   const { taskName, payload, priority } = req.body;
+
   await db.query(
     "INSERT INTO jobs (taskName, payload, priority, status) VALUES (?, ?, ?, 'pending')",
     [taskName, JSON.stringify(payload), priority]
   );
+
   res.json({ message: "Job created" });
 };
 
-export const getJobs = async (req, res) => {
+const getJobs = async (req, res) => {
   const [jobs] = await db.query("SELECT * FROM jobs ORDER BY createdAt DESC");
   res.json(jobs);
 };
 
-export const getJob = async (req, res) => {
+const getJob = async (req, res) => {
   const [job] = await db.query("SELECT * FROM jobs WHERE id=?", [req.params.id]);
   res.json(job[0]);
 };
 
-export const runJob = async (req, res) => {
+const runJob = async (req, res) => {
   const id = req.params.id;
+
   await db.query("UPDATE jobs SET status='running' WHERE id=?", [id]);
 
   setTimeout(async () => {
@@ -39,4 +41,11 @@ export const runJob = async (req, res) => {
   }, 3000);
 
   res.json({ message: "Job running" });
+};
+
+module.exports = {
+  createJob,
+  getJobs,
+  getJob,
+  runJob
 };

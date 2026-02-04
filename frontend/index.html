@@ -1,1 +1,73 @@
-<h1>Job Scheduler Dashboard</h1>
+<!doctype html>
+<html>
+  <head>
+    <title>Job Scheduler</title>
+    <style>
+      body {
+        font-family: Arial;
+        padding: 20px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td,
+      th {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Create Job</h2>
+    <input id="task" placeholder="Task name" />
+    <input id="payload" value='{"email":"test"}' />
+    <select id="priority">
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+    </select>
+    <button onclick="createJob()">Create</button>
+
+    <h2>Jobs</h2>
+    <table id="table"></table>
+
+    <script>
+      async function loadJobs() {
+        const res = await fetch("http://localhost:5000/jobs");
+        const jobs = await res.json();
+        const t = document.getElementById("table");
+        t.innerHTML =
+          "<tr><th>Task</th><th>Priority</th><th>Status</th><th>Run</th></tr>";
+        jobs.forEach((j) => {
+          t.innerHTML += `<tr>
+     <td>${j.taskName}</td>
+     <td>${j.priority}</td>
+     <td>${j.status}</td>
+     <td><button onclick="runJob(${j.id})">Run</button></td>
+   </tr>`;
+        });
+      }
+
+      async function createJob() {
+        await fetch("http://localhost:5000/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            taskName: task.value,
+            payload: JSON.parse(payload.value),
+            priority: priority.value,
+          }),
+        });
+        loadJobs();
+      }
+
+      async function runJob(id) {
+        await fetch(`http://localhost:5000/run-job/${id}`, { method: "POST" });
+        loadJobs();
+      }
+
+      loadJobs();
+    </script>
+  </body>
+</html>
